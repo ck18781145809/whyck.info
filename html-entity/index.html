@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+	<title>HTML Entity</title>
+	<link rel="stylesheet" href="https://qidian.gtimg.com/lulu/pure/css/common/ui/Table.css">
+	<link rel="stylesheet" href="https://qidian.gtimg.com/lulu/pure/css/common/ui/LightTip.css">
+	<link rel="stylesheet" href="https://qidian.gtimg.com/lulu/pure/css/common/ui/Tips.css">
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		main {
+			width: 80%;
+			margin: auto;
+		}
+
+		.character {
+			width: 100px;
+		}
+	</style>
+</head>
+<body>
+<main>
+	<h1>HTML Entity List</h1>
+
+	<p>点击可以复制哦~</p>
+
+	<table class="ui-table">
+		<colgroup>
+			<col class="character">
+			<col>
+			<col class="character">
+			<col>
+			<col class="character">
+			<col>
+		</colgroup>
+		<thead>
+			<tr>
+				<th>Character</th>
+				<th>Entity</th>
+				<th>Character</th>
+				<th>Entity</th>
+				<th>Character</th>
+				<th>Entity</th>
+			</tr>
+		</thead>
+		<tbody id="dataZone">
+	</tbody>
+</table>
+</main>
+
+<script src="https://qidian.gtimg.com/lulu/pure/js/common/ui/LightTip.js"></script>
+<script src="https://qidian.gtimg.com/lulu/pure/js/common/ui/Follow.js"></script>
+<script src="https://qidian.gtimg.com/lulu/pure/js/common/ui/ErrorTip.js"></script>
+<script>
+	function copyEntity(e) {
+		console.log( e )
+		let _input = document.createElement('input');
+			_input.value = e.title;
+
+			document.body.appendChild(_input);
+			e.insertAdjacentElement('afterend', _input);
+
+			_input.focus();
+			_input.select();
+
+			if (document.execCommand('copy')) {
+				document.execCommand('copy');
+				new LightTip().success('复制成功~');
+			} else {
+				new LightTip().error('复制失败~');
+			}
+
+			_input.blur();
+			_input.remove();
+	}
+
+	function renderTable(json) {
+		let keys = Array.from(new Set(Object.keys(json)));
+
+		let str = keys.reduce((acc, cur, idx) => {
+			return `${acc}<td>${json[cur]['characters']}</td><td style="overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"><b title="${cur.replace(/&(.+);/, '&amp;$1&semi;')}" onclick="copyEntity(this)" style="cursor: pointer;">${cur.replace(/&(.+);/, '&amp;$1&semi;')}</b></td>${(idx % 3 === 2 && idx !== 0) ? '</tr><tr>' : ''}`;
+		}, '<tr>');
+
+		if(!keys.length % 3 === 0) {
+			str += '</tr>';
+		}
+
+		document.querySelector('#dataZone').innerHTML = str;
+
+		const myTable = new Table('.ui-table');
+	}
+
+	fetch('./data.json')
+		.then(function(response) {
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			return response.json();
+		})
+		.then(function(response) {
+			renderTable(response)
+		});
+</script>
+</body>
+</html>
